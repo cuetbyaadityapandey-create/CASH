@@ -1,0 +1,103 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AINEX SERVICES - Cash Calculator</title>
+<style>
+body{margin:0;font-family:Arial,sans-serif;background:#eef2f7}
+header{background:#0b5ed7;color:#fff;text-align:center;padding:15px}
+.container{max-width:720px;margin:15px auto;background:#fff;border-radius:12px;box-shadow:0 3px 12px rgba(0,0,0,.15);overflow:hidden}
+table{width:100%;border-collapse:collapse}
+th,td{padding:8px;border-bottom:1px solid #ddd;text-align:center}
+th{background:#f5f5f5}
+.noteimg{width:90px;height:42px;object-fit:contain;border:1px solid #ccc;border-radius:6px}
+.qty{width:45px;text-align:center}
+button{padding:5px 9px;border:none;border-radius:5px;background:#0b5ed7;color:#fff;cursor:pointer}
+.total{margin:15px;background:#198754;color:#fff;padding:15px;border-radius:10px;text-align:center}
+.actions{text-align:center;padding:12px}
+.actions button{margin:4px}
+</style>
+</head>
+<body>
+<header>
+<h2>AINEX SERVICES</h2>
+<div id="dt"></div>
+</header>
+
+<div class="container">
+<table>
+<thead><tr><th>Image</th><th>Value</th><th>Qty</th><th>Total</th></tr></thead>
+<tbody id="rows"></tbody>
+</table>
+
+<div class="total">
+<h2 id="grand">Rs. 0</h2>
+<div id="pieces">Total Pieces: 0</div>
+</div>
+
+<div class="actions">
+<button onclick="saveData()">Save</button>
+<button onclick="resetData()">Reset</button>
+<button onclick="window.print()">Print</button>
+</div>
+</div>
+
+<script>
+const notes=[500,200,100,50,20,10];
+const rows=document.getElementById("rows");
+
+notes.forEach(v=>{
+rows.innerHTML+=`
+<tr>
+<td><img class="noteimg" src="images/${v}.png" onerror="this.alt='${v}';"></td>
+<td><b>Rs. ${v}</b></td>
+<td>
+<button onclick="chg(${v},-1)">-</button>
+<input id="q${v}" class="qty" type="number" min="0" value="0" oninput="calc()">
+<button onclick="chg(${v},1)">+</button>
+</td>
+<td id="t${v}">Rs. 0</td>
+</tr>`;
+});
+
+function chg(v,d){
+const e=document.getElementById("q"+v);
+e.value=Math.max(0,(parseInt(e.value)||0)+d);
+calc();
+}
+function calc(){
+let g=0,p=0;
+notes.forEach(v=>{
+let q=parseInt(document.getElementById("q"+v).value)||0;
+let t=q*v;
+document.getElementById("t"+v).innerText="Rs. "+t.toLocaleString("en-IN");
+g+=t;p+=q;
+});
+grand.innerText="Rs. "+g.toLocaleString("en-IN");
+pieces.innerText="Total Pieces: "+p;
+}
+function saveData(){
+let d={};
+notes.forEach(v=>d[v]=document.getElementById("q"+v).value);
+localStorage.setItem("ainex_cash",JSON.stringify(d));
+alert("Saved");
+}
+function resetData(){
+notes.forEach(v=>document.getElementById("q"+v).value=0);
+localStorage.removeItem("ainex_cash");
+calc();
+}
+(function(){
+let s=localStorage.getItem("ainex_cash");
+if(s){
+let d=JSON.parse(s);
+notes.forEach(v=>{if(d[v]!=null)document.getElementById("q"+v).value=d[v];});
+}
+calc();
+setInterval(()=>dt.innerText=new Date().toLocaleString(),1000);
+})();
+</script>
+</body>
+</html>
